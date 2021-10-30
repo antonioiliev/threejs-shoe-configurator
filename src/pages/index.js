@@ -1,10 +1,12 @@
 import React, { Suspense, useRef, useState, useEffect } from "react";
+import * as THREE from 'three'
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   ContactShadows,
   Environment,
   useGLTF,
   OrbitControls,
+  PerspectiveCamera,
 } from "@react-three/drei";
 import { HexColorPicker } from "react-colorful";
 import { proxy, useSnapshot } from "valtio";
@@ -25,7 +27,7 @@ const state = proxy({
   },
 });
 
-function Shoe() {
+const Shoe = () => {
   const ref = useRef();
   const snap = useSnapshot(state);
   // Drei's useGLTF hook sets up draco automatically, that's how it differs from useLoader(GLTFLoader, url)
@@ -124,7 +126,7 @@ function Shoe() {
   );
 }
 
-function Picker() {
+const Picker = () => {
   const snap = useSnapshot(state);
   return (
     <div style={{ display: snap.current ? "block" : "none" }}>
@@ -138,13 +140,18 @@ function Picker() {
   );
 }
 
-export default function App() {
+const Camera = () => {
+  return <PerspectiveCamera makeDefault position={[0, 0, 4]} fov={50} />
+}
+
+const ShoeConfigurator = () => {
   return (
     <>
-      <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 50 }}>
-        <ambientLight intensity={0.7} />
+      <Canvas shadows dpr={[1, 2]}>
+        <Camera />
+        <ambientLight intensity={1} />
         <spotLight
-          intensity={0.5}
+          intensity={0.7}
           angle={0.1}
           penumbra={1}
           position={[10, 15, 10]}
@@ -152,7 +159,6 @@ export default function App() {
         />
         <Suspense fallback={null}>
           <Shoe />
-          <Environment preset="city" />
           <ContactShadows
             rotation-x={Math.PI / 2}
             position={[0, -0.8, 0]}
@@ -166,7 +172,11 @@ export default function App() {
         <OrbitControls
           minPolarAngle={Math.PI / 2}
           maxPolarAngle={Math.PI / 2}
-          enableZoom={false}
+          enableZoom={true}
+          enableDamping={true}
+          dampingFactor={0.05}
+          minDistance={2}
+          maxDistance={6}
           enablePan={false}
         />
       </Canvas>
@@ -174,3 +184,5 @@ export default function App() {
     </>
   );
 }
+
+export default ShoeConfigurator
